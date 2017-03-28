@@ -1,12 +1,12 @@
 {
   "name": "object-dsl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "µ functional library to transverse objects using a extendable DSL-like syntax",
   "author": "@diffcunha",
   "license": "ISC",
   "main": "lib/index.js",
   "engines": {
-    "node" : ">=6.0.0"
+    "node": ">=6.0.0"
   },
   "scripts": {
     "prebuild": "rm -rf ./lib",
