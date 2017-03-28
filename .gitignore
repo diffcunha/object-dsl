@@ -1,0 +1,17 @@
+.nyc_output
+.DS_store
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.swp
+*.swo
+*.gz
+*.orig
+
+npm-debug.log
+lib/
+node_modules/
+coverage/

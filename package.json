@@ -1,0 +1,30 @@
+{
+  "name": "object-dsl",
+  "version": "0.1.0",
+  "description": "µ functional library to transverse objects using a extendable DSL-like syntax",
+  "author": "@diffcunha",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "engines": {
+    "node" : ">=6.0.0"
+  },
+  "scripts": {
+    "prebuild": "rm -rf ./lib",
+    "build": "babel ./src --out-dir ./lib",
+    "lint": "eslint .",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.0",
+    "babel-preset-node6": "^11.0.0",
+    "eslint": "^3.18.0",
+    "eslint-config-standard": "^7.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-node": "^4.2.2",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^2.1.1"
+  }
+}
