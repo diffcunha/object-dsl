@@ -12,137 +12,95 @@ $ npm i --save object-dsl
 ### Simple transformations
 
 ```js
-import { compileFactory } from 'object-dsl'
+import compile, { object } from 'object-dsl'
 
 // Operators
-const replace = update => text => node => node.replace('%placeholder%', text)
-const toUpper = update => node => node.toUpperCase()
+const replace = text => next => node => node.replace('%placeholder%', text)
+const toUpper = next => node => node.toUpperCase()
 
-// Build compile function
-const compile = compileFactory({ toUpper, replace })
+// DSL spec
+const dsl = object({
+  foo: replace('world'),
+  obj: object({
+    name: toUpper
+  })
+})
 
 // Compile DSL
-const dsl = compile(({ replace, toUpper }) => ({
-  foo: replace('world'),
-  obj: {
-    name: toUpper
-  }
-}))
+const compiled = compile(dsl)
 
 // Run with object
-const result = dsl({
+const result = compiled({
   foo: 'hello %placeholder%',
   obj: {
-    name: 'foobar',
-    index: 1
+    name: 'foobar'
   }
 })
 
-console.log(result)
-
-/*
-{
-  foo: 'hello world',
-  obj: {
-    name: 'FOOBAR'
-    // index is missing, dsl only generates the 'changes'
-  }
-}
-*/
+console.log(result) // { foo: 'hello world', obj: { name: 'FOOBAR' } }
 ```
 
 ### Composition
 
 ```js
-import { compileFactory } from 'object-dsl'
+import compile, { object } from 'object-dsl'
 
 // Operators
-const replace = update => text => node => node.replace('%placeholder%', text)
-const toUpper = update => node => node.toUpperCase()
+const replace = text => next => node => node.replace('%placeholder%', text)
+const toUpper = next => node => node.toUpperCase()
 
-// Build compile function
-const compile = compileFactory({ toUpper, replace })
-
-// Compile DSL
-const obj = compile(({ toUpper }) => ({
+// DSL spec
+const obj = object({
   name: toUpper
-}))
+})
 
-const dsl = compile(({ replace }) => ({
+const dsl = object({
   foo: replace('world'),
   obj
-}))
-
-// Run with object
-const result = dsl({
-  foo: 'hello %placeholder%',
-  obj: {
-    name: 'foobar',
-    index: 1
-  }
 })
-
-/*
-{
-  foo: 'hello world',
-  obj: {
-    name: 'FOOBAR'
-    // index is missing, dsl only generates the 'changes'
-  }
-}
-*/
-
-import { withMerge } from 'object-dsl/utils'
-
-const dslWithMerge = withMerge(dsl)
-const result = dslWithMerge({
-  foo: 'hello %placeholder%',
-  obj: {
-    name: 'foobar',
-    index: 1
-  }
-})
-
-/*
-{
-  foo: 'hello world',
-  obj: {
-    name: 'FOOBAR'
-    index: 1
-  }
-}
-*/
-```
-
-### `object` and `array` operators 
-
-```js
-import { compileFactory } from 'object-dsl'
-import { array, object } from 'object-dsl/operators'
-
-// Operators
-const replace = update => (placeholder, text) => node => node.replace(`%${placeholder}%`, text)
-const photo = update => node => `http://image-server.com/files/${node}`
-
-// Build compile function
-const compile = compileFactory({ array, object, replace, photo })
 
 // Compile DSL
-const dsl = compile(({ array, object, replace, photo }) => ({
+const compiled = compile(dsl)
+
+// Run with object
+const result = compiled({
+  foo: 'hello %placeholder%',
+  obj: {
+    name: 'foobar'
+  }
+})
+
+console.log(result) // { foo: 'hello world', obj: { name: 'FOOBAR' } }
+```
+
+### `array` and `map` operators 
+
+```js
+import compile, { object, array, map } from 'object-dsl'
+
+// Operators
+const replace = (placeholder, text) => next => node => node.replace(`%${placeholder}%`, text)
+const photo = next => node => `http://image-server.com/files/${node}`
+
+// DSL spec
+const dsl = object({
   names: (
     array(
       replace('title', 'Mr.')
     )
   ),
   images: (
-    object(
+    map(
       photo
     )
   )
-}))
+})
+
+// Compile DSL
+const compiled = compile(dsl)
 
 // Run with object
-const result = dsl({
+const result = compiled({
   names: [
     '%title% John Doe',
     '%title% John Smith'
@@ -153,6 +111,8 @@ const result = dsl({
     other: 'other.png'
   }
 })
+
+console.log(result)
 
 /*
 {
@@ -166,6 +126,52 @@ const result = dsl({
     other: 'http://image-server.com/files/other.png'
   }
  }
+*/
+```
+
+### Passing state
+
+```js
+import compile, { withMerge, object, array, map } from 'object-dsl'
+
+// Operators
+const item = next => (node, state) => ({ ...node, path: state.path })
+
+// DSL spec
+const dsl = object({
+  types: map(array(item)),
+})
+
+// Compile DSL
+const update = (state, { key }) => ({...state, path: [...state.path, key] })
+const compiled = compile(dsl, update, { path: ['root'] })
+
+// Run with object
+const result = compiled({
+  types: {
+    type1: [{ id: 'type1_1' }, { id: 'type1_2' }],
+    type2: [{ id: 'type2_1' }]
+  }
+})
+
+console.log(result)
+
+/*
+{
+  "types": {
+    "type1": [{
+      "id": "type1_1",
+      "path": ["root", "types", "type1", 0]
+    }, {
+      "id": "type1_2",
+      "path": ["root", "types", "type1", 1]
+    }],
+    "type2": [{
+      "id": "type2_1",
+      "path": ["root", "types", "type2", 0]
+    }]
+  }
+}
 */
 ```
 
