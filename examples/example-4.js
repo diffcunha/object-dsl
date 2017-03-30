@@ -1,15 +1,15 @@
-import compile, { withMerge, object, array, map } from '../src'
+import compile, { object, array, map } from '../src'
 
 // Operators
 const item = next => (node, state) => ({ ...node, path: state.path })
 
 // DSL spec
 const dsl = object({
-  types: map(array(item)),
+  types: map(array(item))
 })
 
 // Compile DSL
-const update = (state, { key }) => ({...state, path: [...state.path, key] })
+const update = (state, { key }) => ({ path: [...state.path, key] })
 const compiled = compile(dsl, update, { path: ['root'] })
 
 // Run with object
@@ -21,3 +21,21 @@ const result = compiled({
 })
 
 console.log(JSON.stringify(result, null, '  '))
+
+/*
+{
+  "types": {
+    "type1": [{
+      "id": "type1_1",
+      "path": ["root", "types", "type1", 0]
+    }, {
+      "id": "type1_2",
+      "path": ["root", "types", "type1", 1]
+    }],
+    "type2": [{
+      "id": "type2_1",
+      "path": ["root", "types", "type2", 0]
+    }]
+  }
+}
+*/

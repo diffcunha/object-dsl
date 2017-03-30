@@ -27,7 +27,6 @@ const result = compiled({
 
 console.log(result) // { foo: 'hello world', obj: { name: 'FOOBAR' } }
 
-
 // import { withMerge } from 'object-dsl/utils'
 
 // const dslWithMerge = withMerge(dsl)

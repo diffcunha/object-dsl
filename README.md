@@ -139,11 +139,11 @@ const item = next => (node, state) => ({ ...node, path: state.path })
 
 // DSL spec
 const dsl = object({
-  types: map(array(item)),
+  types: map(array(item))
 })
 
 // Compile DSL
-const update = (state, { key }) => ({...state, path: [...state.path, key] })
+const update = (state, { key }) => ({ path: [...state.path, key] })
 const compiled = compile(dsl, update, { path: ['root'] })
 
 // Run with object
