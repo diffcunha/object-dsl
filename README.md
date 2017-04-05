@@ -12,19 +12,19 @@ $ npm i --save object-dsl
 ### Simple transformations
 
 ```js
-import compile, { object } from 'object-dsl'
+import compile from 'object-dsl'
 
 // Operators
 const replace = text => next => node => node.replace('%placeholder%', text)
 const toUpper = next => node => node.toUpperCase()
 
 // DSL spec
-const dsl = object({
+const dsl = {
   foo: replace('world'),
-  obj: object({
+  obj: {
     name: toUpper
-  })
-})
+  }
+}
 
 // Compile DSL
 const compiled = compile(dsl)
@@ -43,21 +43,21 @@ console.log(result) // { foo: 'hello world', obj: { name: 'FOOBAR' } }
 ### Composition
 
 ```js
-import compile, { object } from 'object-dsl'
+import compile from 'object-dsl'
 
 // Operators
 const replace = text => next => node => node.replace('%placeholder%', text)
 const toUpper = next => node => node.toUpperCase()
 
 // DSL spec
-const obj = object({
+const obj = {
   name: toUpper
-})
+}
 
-const dsl = object({
+const dsl = {
   foo: replace('world'),
   obj
-})
+}
 
 // Compile DSL
 const compiled = compile(dsl)
@@ -76,14 +76,14 @@ console.log(result) // { foo: 'hello world', obj: { name: 'FOOBAR' } }
 ### `array` and `map` operators 
 
 ```js
-import compile, { object, array, map } from 'object-dsl'
+import compile, { array, map } from 'object-dsl'
 
 // Operators
 const replace = (placeholder, text) => next => node => node.replace(`%${placeholder}%`, text)
 const photo = next => node => `http://image-server.com/files/${node}`
 
 // DSL spec
-const dsl = object({
+const dsl = {
   names: (
     array(
       replace('title', 'Mr.')
@@ -94,7 +94,7 @@ const dsl = object({
       photo
     )
   )
-})
+}
 
 // Compile DSL
 const compiled = compile(dsl)
@@ -132,13 +132,13 @@ console.log(result)
 ### Passing state
 
 ```js
-import compile, { withMerge, object, array, map } from 'object-dsl'
+import compile, { array, map } from 'object-dsl'
 
 // Operators
-const item = next => (node, state) => ({ ...node, path: state.path })
+const item = next => (node, state) => ({ path: state.path })
 
 // DSL spec
-const dsl = object({
+const dsl = {
   types: (
     map(
       array(
@@ -146,37 +146,64 @@ const dsl = object({
       )
     )
   )
-})
+}
 
 // Compile DSL
 const reducer = (state, { key }) => ({ path: [...state.path, key] })
 const initState = { path: ['root'] }
 const compiled = compile(dsl, reducer, initState)
 
-// Run with object
-const result = compiled({
-  types: {
-    type1: [{ id: 'type1_1' }, { id: 'type1_2' }],
-    type2: [{ id: 'type2_1' }]
-  }
-})
 
+const obj = {
+  types: {
+    type1: [
+      { id: 'type1_1' },
+      { id: 'type1_2' }
+    ],
+    type2: [
+      { id: 'type2_1' }
+    ]
+  }
+}
+
+// Run with object
+const result = compiled(obj)
 console.log(result)
 
 /*
 {
-  "types": {
-    "type1": [{
-      "id": "type1_1",
-      "path": ["root", "types", "type1", 0]
-    }, {
-      "id": "type1_2",
-      "path": ["root", "types", "type1", 1]
-    }],
-    "type2": [{
-      "id": "type2_1",
-      "path": ["root", "types", "type2", 0]
-    }]
+  types: {
+    type1: [
+      { path: ["root", "types", "type1", 0] },
+      { path: ["root", "types", "type1", 1] }
+    ],
+    type2: [
+      { path: ["root", "types", "type2", 0] }
+    ]
+  }
+}
+*/
+
+// ---------
+// withMerge
+// ---------
+
+import { withMerge } from 'object-dsl'
+
+// Run with object
+const result = withMerge(compiled)(obj)
+console.log(result)
+
+/*
+{
+  types: {
+    type1: [
+      { id: 'type1_1', path: ["root", "types", "type1", 0] },
+      { id: 'type1_2', path: ["root", "types", "type1", 1] }
+    ],
+    type2: [
+      { id: 'type2_1', path: ["root", "types", "type2", 0] }
+    ]
   }
 }
 */

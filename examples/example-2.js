@@ -1,18 +1,18 @@
-import compile, { object } from '../src'
+import compile from '../src'
 
 // Operators
 const replace = text => next => node => node.replace('%placeholder%', text)
 const toUpper = next => node => node.toUpperCase()
 
 // DSL spec
-const obj = object({
+const obj = {
   name: toUpper
-})
+}
 
-const dsl = object({
+const dsl = {
   foo: replace('world'),
   obj
-})
+}
 
 // Compile DSL
 const compiled = compile(dsl)

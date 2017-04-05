@@ -1,11 +1,11 @@
-import compile, { object, array, map } from '../src'
+import compile, { array, map } from '../src'
 
 // Operators
 const replace = (placeholder, text) => next => node => node.replace(`%${placeholder}%`, text)
 const photo = next => node => `http://image-server.com/files/${node}`
 
 // DSL spec
-const dsl = object({
+const dsl = {
   names: (
     array(
       replace('title', 'Mr.')
@@ -16,7 +16,7 @@ const dsl = object({
       photo
     )
   )
-})
+}
 
 // Compile DSL
 const compiled = compile(dsl)
