@@ -1,6 +1,6 @@
 {
   "name": "object-dsl",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "µ functional library to transverse objects using a extendable DSL-like syntax",
   "author": "@diffcunha",
   "license": "ISC",
